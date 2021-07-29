@@ -1,6 +1,7 @@
 const http = require('http') ;
 const URL = require('url').URL ; 
 const url = require('url') ;
+const StringDecoder = require('string_decoder').StringDecoder ;
 
 const WORK_ENV = 'test' ;
 
@@ -17,20 +18,49 @@ const urlParser = (myurl) =>{
 const server = http.createServer((req, res)=>{
 
     //Get the url and parse it
-    var path = '' ;
+    
+    var parsedURL = '' ;
     try{
-        const parsedURL = urlParser(req.url) ;
-        path = parsedURL.pathname ;
+        parsedURL = urlParser(req.url) ;
     }catch(error){
         console.log('url parser error')
     }
 
     //Get the path
+    var path = parsedURL.pathname ;
     const trimmedPath = path.replace(/^\/+|\/+$/g,'') ;
 
-    console.log('the requested url is: ', {trimmedPath})
+    //Get the HTTP method requested for
+    const httpMethod = req.method.toLowerCase();
 
-    res.end('Hello world\n') ;
+    //Get query string from url paramater
+    const queryString = parsedURL.query ;
+
+    //Get request headers
+    const reqHeaders = req.headers
+
+    //Get request payload. HTTP request are also node stream. To read the payload data, its advisable to read as stream.
+    // when reading data as stream, you use node string decoder library for proper formating.
+    const decoder = new StringDecoder('utf-8');
+    var buffer = '' ;
+
+    //Once any data comes in, decode the data, and add to the buffer.
+    req.on('data', (data) =>{
+        buffer += decoder.write(data)
+    }) ;
+
+    req.on('end' , () =>{
+        buffer += decoder.end() ;
+
+        const logMessage = `the requested url is: ${trimmedPath}, the requested HTTP method is: ${httpMethod},
+        requested query is  ${queryString}, and the request header is given as ${reqHeaders}, and payload is: ${buffer}`
+
+        res.end(logMessage) ;
+        console.log(reqHeaders)
+    })
+
+
+    
 })
 
 //Start server,and have it listen to a port
