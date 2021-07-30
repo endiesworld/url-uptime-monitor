@@ -3,7 +3,13 @@ const URL = require('url').URL ;
 const url = require('url') ;
 const StringDecoder = require('string_decoder').StringDecoder ;
 
+const router = require('./router') ;
+
 const WORK_ENV = 'test' ;
+
+const pageNotFound = (data, callBack) =>{
+    callBack(404)
+}
 
 /**
  * 
@@ -44,6 +50,7 @@ const server = http.createServer((req, res)=>{
     const decoder = new StringDecoder('utf-8');
     var buffer = '' ;
 
+    
     //Once any data comes in, decode the data, and add to the buffer.
     req.on('data', (data) =>{
         buffer += decoder.write(data)
@@ -52,8 +59,9 @@ const server = http.createServer((req, res)=>{
     req.on('end' , () =>{
         buffer += decoder.end() ;
 
+        var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : ()=> pageNotFound()
         const logMessage = `the requested url is: ${trimmedPath}, the requested HTTP method is: ${httpMethod},
-        requested query is  ${queryString}, and the request header is given as ${reqHeaders}, and payload is: ${buffer}`
+        requested query is  ${queryString}, and the request header is given as ${reqHeaders}, and payload is: ${buffer}, the chosenHandler is: ${chosenHandler}`
 
         res.end(logMessage) ;
         console.log(reqHeaders)
