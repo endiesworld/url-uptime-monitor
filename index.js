@@ -1,4 +1,5 @@
 const http = require('http') ;
+const https = require('https') ;
 const URL = require('url').URL ; 
 const url = require('url') ;
 const StringDecoder = require('string_decoder').StringDecoder ;
@@ -7,7 +8,8 @@ const router = require('./router') ;
 const env = require('./config')
 
 const WORK_ENV = env.envName ; 
-const PORT = env.port
+const HTTPPORT = env.httpPort ;
+const HTTPSPORT = env.httpsPort ;
 
 
 /**
@@ -20,8 +22,9 @@ const urlParser = (myurl) =>{
 }
 
 const pageNotFound = (data , callBack) => callBack(404) 
-//Create an http serve.
-const server = http.createServer((req, res)=>{
+
+//Create a unified server logi for both http and https
+const unifiedServer = (req, res)=>{
 
     //Get the url and parse it
     
@@ -50,7 +53,6 @@ const server = http.createServer((req, res)=>{
     const decoder = new StringDecoder('utf-8');
     var buffer = '' ;
 
-    
     //Once any data comes in, decode the data, and add to the buffer.
     req.on('data', (data) =>{
         buffer += decoder.write(data)
@@ -91,16 +93,19 @@ const server = http.createServer((req, res)=>{
 
             console.log('Returning this response: ', resStatusCode, payloadString)
         })
-
-      
     })
+}
 
+//Create an http serve.
+const httpServer = http.createServer((req, res) => {(unifiedServer(req, res))}) ;
 
-    
-})
+//Create an https serve.
+const httpsServer = http.createServer((req, res) => {(unifiedServer(req, res))}) ;
 
 //Start server,and have it listen to a port
-server.listen(PORT, () => console.log('Server running on port: ', PORT)) ;
+httpServer.listen(HTTPPORT, () => console.log('Server running on port: ', PORT)) ;
+
+//Start server,and have it listen to a port
+httpsServer.listen(HTTPSPORT, () => console.log('Server running on port: ', PORT)) ;
 
 console.log('process env accesed from index file is: ', process.env.NODE_ENV.toLowerCase()) ;
-
