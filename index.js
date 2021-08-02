@@ -4,12 +4,11 @@ const url = require('url') ;
 const StringDecoder = require('string_decoder').StringDecoder ;
 
 const router = require('./router') ;
+const env = require('./config')
 
-const WORK_ENV = 'test' ;
+const WORK_ENV = env.envName ; 
+const PORT = env.port
 
-const pageNotFound = (data, callBack) =>{
-    callBack(404)
-}
 
 /**
  * 
@@ -17,9 +16,10 @@ const pageNotFound = (data, callBack) =>{
  * @returns url parser
  */
 const urlParser = (myurl) =>{
-    return (WORK_ENV === 'test') ? url.parse(myurl) : new URL(myurl) ;
+    return (WORK_ENV === 'staging') ? url.parse(myurl) : new URL(myurl) ;
 }
 
+const pageNotFound = (data , callBack) => callBack(404) 
 //Create an http serve.
 const server = http.createServer((req, res)=>{
 
@@ -59,12 +59,40 @@ const server = http.createServer((req, res)=>{
     req.on('end' , () =>{
         buffer += decoder.end() ;
 
-        var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : ()=> pageNotFound()
-        const logMessage = `the requested url is: ${trimmedPath}, the requested HTTP method is: ${httpMethod},
-        requested query is  ${queryString}, and the request header is given as ${reqHeaders}, and payload is: ${buffer}, the chosenHandler is: ${chosenHandler}`
+        //Choose the handler this request should go to. or return page not found whent route does not exist.
+        var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : pageNotFound
 
-        res.end(logMessage) ;
-        console.log(reqHeaders)
+        //Construct the data object to send to the handler
+        const handlerData ={
+            trimmedPath,
+            queryString,
+            httpMethod,
+            reqHeaders,
+            "payload": buffer
+        };
+
+        //Route the request to the handler specified in the router
+        chosenHandler(handlerData, function(statusCode, payload){
+
+            console.log('the type of status code: ', typeof(statusCode), 'and value is: ', statusCode)
+            //Use the status code called back by the handler, or default to 200
+            let resStatusCode = typeof(statusCode) === 'number'  ? statusCode : 200
+
+            //Use the payload called by the handler or defualt to empty object 
+            let resPayload = typeof(payload) === 'object' ? payload : {} ; 
+
+            //Convert the payload to a string
+            let payloadString = JSON.stringify(resPayload) ;
+
+            //Return the response
+            res.setHeader('Content-Type', 'application/json')
+            res.writeHead(resStatusCode) ;
+            res.end(payloadString) ;
+
+            console.log('Returning this response: ', resStatusCode, payloadString)
+        })
+
+      
     })
 
 
@@ -72,6 +100,7 @@ const server = http.createServer((req, res)=>{
 })
 
 //Start server,and have it listen to a port
+server.listen(PORT, () => console.log('Server running on port: ', PORT)) ;
 
-server.listen(3000, () => console.log('Server running on port 3000'))
+console.log('process env accesed from index file is: ', process.env.NODE_ENV.toLowerCase()) ;
 
