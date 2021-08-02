@@ -1,3 +1,4 @@
 const openssl = require('openssl-nodejs') ;
 
-openssl('openssl req -config csr.cnf -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem') ;
+openssl(['req', '-config', 'csr.conf', '-out', 'CSR.csr', '-new', '-newkey', 'rsa:2048', '-nodes', '-keyout', 'privateKey.key'], function (err, buffer) {
+    console.log(err.toString(), buffer.toString())})
