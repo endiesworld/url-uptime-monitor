@@ -3,6 +3,7 @@ const https = require('https') ;
 const URL = require('url').URL ; 
 const url = require('url') ;
 const StringDecoder = require('string_decoder').StringDecoder ;
+const fs = require('fs') ;
 
 const router = require('./router') ;
 const env = require('./config')
@@ -100,12 +101,16 @@ const unifiedServer = (req, res)=>{
 const httpServer = http.createServer((req, res) => {(unifiedServer(req, res))}) ;
 
 //Create an https serve.
-const httpsServer = http.createServer((req, res) => {(unifiedServer(req, res))}) ;
+const httpsServerOptions = {
+    'key': fs.readFileSync('./https/key.pem', 'utf8') ,
+    'cert': fs.readFileSync('./https/server.crt', 'utf8')
+};
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {(unifiedServer(req, res))}) ;
 
 //Start server,and have it listen to a port
-httpServer.listen(HTTPPORT, () => console.log('Server running on port: ', PORT)) ;
+httpServer.listen(HTTPPORT, () => console.log('Server running on port: ', HTTPPORT)) ;
 
 //Start server,and have it listen to a port
-httpsServer.listen(HTTPSPORT, () => console.log('Server running on port: ', PORT)) ;
+httpsServer.listen(HTTPSPORT, () => console.log('Server running on port: ', HTTPSPORT)) ;
 
 console.log('process env accesed from index file is: ', process.env.NODE_ENV.toLowerCase()) ;
