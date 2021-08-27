@@ -4,13 +4,13 @@ const URL = require('url').URL ;
 const url = require('url') ;
 const StringDecoder = require('string_decoder').StringDecoder ;
 const fs = require('fs') ;
+const helpers = require('./lib/helpers')
 
-const testFileOperations = require('./test/file') ;
+const env = require('./config') ;
+const router = require('./lib/router') ;
 
-testFileOperations.delete() 
-
-const router = require('./router') ;
-const env = require('./config')
+// const testFileOperations = require('./test/file') ;
+// testFileOperations.delete() 
 
 const WORK_ENV = env.envName ; 
 const HTTPPORT = env.httpPort ;
@@ -75,7 +75,7 @@ const unifiedServer = (req, res)=>{
             queryString,
             httpMethod,
             reqHeaders,
-            "payload": buffer
+            payload : helpers.parseJsonToObject(buffer)
         };
 
         //Route the request to the handler specified in the router
