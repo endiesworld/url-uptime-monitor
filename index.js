@@ -5,6 +5,10 @@ const url = require('url') ;
 const StringDecoder = require('string_decoder').StringDecoder ;
 const fs = require('fs') ;
 
+const testFileOperations = require('./test/file') ;
+
+testFileOperations.delete() 
+
 const router = require('./router') ;
 const env = require('./config')
 
@@ -39,7 +43,7 @@ const unifiedServer = (req, res)=>{
     //Get the path
     var path = parsedURL.pathname ;
     const trimmedPath = path.replace(/^\/+|\/+$/g,'') ;
-
+    console.log('trimmed path is: ', trimmedPath) ;
     //Get the HTTP method requested for
     const httpMethod = req.method.toLowerCase();
 
@@ -113,4 +117,4 @@ httpServer.listen(HTTPPORT, () => console.log('Server running on port: ', HTTPPO
 //Start server,and have it listen to a port
 httpsServer.listen(HTTPSPORT, () => console.log('Server running on port: ', HTTPSPORT)) ;
 
-console.log('process env accesed from index file is: ', process.env.NODE_ENV.toLowerCase()) ;
+//console.log('process env accesed from index file is: ', process.env.NODE_ENV.toLowerCase()) ;

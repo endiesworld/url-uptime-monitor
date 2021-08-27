@@ -1,13 +1,15 @@
 var handlers = {} ;
 
-handlers.sample = (data, callBack) =>{
-
+//Ping handler
+handlers.ping = (data, callBack) =>{
     // Callback a http status code, and a payload object
-    callBack(406, {'name' : 'sample handler'})
+    callBack(200, {'name' : 'sample handler'})
 };
 
 const router = {
-    'sample': handlers.sample 
+    'ping': handlers.ping 
 }
+
+
 
 module.exports = router
