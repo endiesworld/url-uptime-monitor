@@ -49,7 +49,7 @@ const unifiedServer = (req, res)=>{
 
     //Get query string from url paramater
     const queryString = parsedURL.query ;
-
+    console.log('QUERY STRING DETAILS ARE: ', queryString)
     //Get request headers
     const reqHeaders = req.headers
 
