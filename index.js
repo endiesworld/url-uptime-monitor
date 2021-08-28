@@ -23,7 +23,7 @@ const HTTPSPORT = env.httpsPort ;
  * @returns url parser
  */
 const urlParser = (myurl) =>{
-    return (WORK_ENV === 'staging') ? url.parse(myurl) : new URL(myurl) ;
+    return (WORK_ENV === 'staging') ? url.parse(myurl,true) : new URL(myurl) ;
 }
 
 const pageNotFound = (data , callBack) => callBack(404) 
